@@ -40,9 +40,9 @@ void * sell(void *arguments)
 }
 
 void wakeup_all_seller_threads() {
-  // pthread_mutex_lock(&mutex);
+  pthread_mutex_lock(&mutex);
   pthread_cond_broadcast(&cond);
-  // pthread_mutex_unlock(&mutex);
+  pthread_mutex_unlock(&mutex);
 }
 
 //TODO: Command line argument for N
