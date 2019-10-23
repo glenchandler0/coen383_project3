@@ -10,7 +10,7 @@
 
 #define ROWS 10 
 #define COLS 10
-#define RUNTIME 10
+#define RUNTIME 60
 
 Seat* seats[ROWS][COLS];
 
@@ -54,20 +54,26 @@ void * sell(void *arguments)
 {
   //Fetch arguments from void * struct
   struct arg_struct *args = (struct arg_struct *)arguments;
-  int i = 0;
-  printf("0:%02d %c%d initiated\n", i, args->seller_type, args->thread_index);
-  while(i < RUNTIME)
+  int local_time = 0;
+  printf("0:%02d %c%d initiated\n", local_time, args->seller_type, args->thread_index);
+  while(local_time < RUNTIME) // while local time is less than RUNTIME and both queues aren't empty
   {
-    printf("0:%02d %c%d: waiting for main to release\n", i, args->seller_type, args->thread_index);
+    printf("0:%02d %c%d: waiting for main to release\n", local_time, args->seller_type, args->thread_index);
     pthread_mutex_lock(&mutex);
     pthread_cond_wait(&cond, &mutex);
     pthread_mutex_unlock(&mutex);
-    // Serve any buyer available in this seller queue that is ready
-    // now to buy ticket till done with all relevant buyers in their queue ..................
-    ++i;
+    // dequeue all valid customers from the waiting queue and queue them into the ready queue EVENT 1
+    // if front customer is being helped
+    //		decrement their timer
+    //		if time is zero then give them seat and dequeue from ready queue EVENT 3
+    // else
+    //		Serve any buyer available in this seller queue that is ready (assign them random transaction time) EVENT 2
+    
+    ++local_time;
 
   }
-  printf("0:%02d %c%d time slice work completed\n", i, args->seller_type, args->thread_index);
+  // if ready queue is not empty then remove all customers from queue until empty
+  printf("0:%02d %c%d time slice work completed\n", local_time, args->seller_type, args->thread_index);
 
   return NULL; // thread exits
 }
@@ -142,11 +148,11 @@ int main(int argc, char *argv[])
   printf("\tAll threads created, about to signal to begin\n");
   // usleep(1000 * 1000);
   for(int current = 0; current < RUNTIME; current++) {
-  usleep(500);
+  usleep(10000);
   wakeup_all_seller_threads(); //Race condition if seller waits for mutex
   }
   // wait for all seller threads to exit
-  for (i = 0 ; i < 10 ; i++)
+  for (i = 0 ; i < 10; i++)
     pthread_join(tids[i], NULL); //TODO: Add & back
 
   printf("\tAll threads joined\n");
