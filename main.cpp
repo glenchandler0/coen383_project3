@@ -10,7 +10,7 @@
 
 #define ROWS 10
 #define COLS 10
-#define RUNTIME 1000
+#define RUNTIME 60
 
 //Function definitions
 void printSeats();
@@ -57,11 +57,17 @@ void * sell(void * arguments)
 
         printf("%d: Unlocked by main, doing work!\n", args->thread_index);
 
-        //Moves people from waiting queue to ready queue
-        //does one unit of work on whoever is in the front
-        // if(this_seller->update(global_counter))
-        //   printf("%d: Ticket sold\n", args->thread_index);
-          // printSeats();
+        // Moves people from waiting queue to ready queue
+        // does one unit of work on whoever is in the front
+        Customer* cust = this_seller->update(global_counter);
+        if(cust != NULL)
+        {
+            assign_next_seat(cust);
+            printSeats();
+        }
+            // printSeats();
+            // printf("%d: Ticket sold\n", args->thread_index);
+          
 
         if(global_counter >= RUNTIME || is_full())
         {

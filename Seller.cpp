@@ -17,7 +17,6 @@ Seller::Seller(char seller_type, unsigned int seller_id, unsigned int N)
     {
         Customer* new_customer = new Customer(this->seller_type, 
                                               this->seller_id);
-        this->sellTicket();
         this->waiting->push(new_customer);
     }
 
@@ -84,7 +83,7 @@ Customer* Seller::update(unsigned int current_minute)
             cust->printCustomer();
             printf(" has finished purchasing a ticket.\n");
             
-            this->ready->front();
+            this->ready->pop();
 
             return cust;
         }
@@ -97,6 +96,7 @@ Customer* Seller::update(unsigned int current_minute)
             
             // Assign the customer an id based on order of the queue
             unsigned int cust_id = this->getTicketsSold();
+            printf("GET TICKETS SOLD: %d\n", cust_id);
             cust->setCustomerId(cust_id);
             this->sellTicket();
 
