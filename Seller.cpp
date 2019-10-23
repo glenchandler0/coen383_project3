@@ -47,7 +47,7 @@ void Seller::addToWaitingQueue(Customer *new_customer)
     this->waiting->push(new_customer);
 }
 
-bool Seller::update(unsigned int current_minute)
+Customer* Seller::update(unsigned int current_minute)
 {
     // Move people from the waiting queue to the ready queue
     while(!this->waiting->empty() && 
@@ -57,7 +57,7 @@ bool Seller::update(unsigned int current_minute)
         Customer* cust = this->waiting->top();
         
         // DEBUG
-        printf("Waiting Time: %d\n", cust->getWaitTime());
+        // printf("Waiting Time: %d\n", cust->getWaitTime());
 
         // Output when customer arrived in 
         printf("Customer ");
@@ -86,13 +86,13 @@ bool Seller::update(unsigned int current_minute)
             
             this->ready->front();
 
-            return true;
+            return cust;
         }
 
         // If the person is new to the front line, then print seat assignment
-        if(!this->waiting->top()->getHasBeenHelped())
+        if(!this->ready->front()->getHasBeenHelped())
         {
-            Customer* cust = this->waiting->top();
+            Customer* cust = this->ready->front();
             cust->setHasBeenHelped();
             
             // Assign the customer an id based on order of the queue
@@ -107,17 +107,17 @@ bool Seller::update(unsigned int current_minute)
         }
 
         // If someone at the front of the queue, perform one unit of work on them
-        if(this->waiting->top()->getWaitTime() > 0)
+        if(this->ready->front()->getWaitTime() > 0)
         {
-            Customer* cust = this->waiting->top();
+            Customer* cust = this->ready->front();
             cust->decrementWaitTime();
-            return false;
+            return NULL;
         }
 
         //TODO: Should be done in main: Remove people if there are no more seats, and print 
 
     }
-    return false;
+    return NULL;
 }
 
 // Removes all unserved Customers after concert is sold out

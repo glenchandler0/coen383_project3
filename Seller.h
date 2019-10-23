@@ -49,7 +49,7 @@ class Seller
         
 
         // Call this every new minute
-        bool update(unsigned int current_minute);
+        Customer* update(unsigned int current_minute);
 
         // For debugging
         pq* getWaitingQueue(){return this->waiting;}
