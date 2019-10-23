@@ -91,7 +91,8 @@ void * sell(void * arguments)
 
         //Moves people from waiting queue to ready queue
         //does one unit of work on whoever is in the front
-        this_seller->update(global_counter);
+        if(this_seller->update(global_counter))
+          printf("%d: Ticket sold\n", args->thread_index);
           // printSeats();
 
         if(global_counter >= RUNTIME || is_full())
