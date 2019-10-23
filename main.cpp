@@ -37,6 +37,9 @@ struct arg_struct {
     int thread_index;
 };
 
+int customer_count[10] = {0,0,0,0,0,0,0,0,0,0};
+int turnedaway_count[10] = {0,0,0,0,0,0,0,0,0,0};
+
 // int value N that the user will pass in through the command line
 int N;
 
@@ -76,8 +79,10 @@ void * sell(void * arguments)
         }
     }
 
+    customer_count[args->thread_index] += this_seller->getTicketsSold();
+    turnedaway_count[args->thread_index] += this_seller->getNumPurged();
     // ready_list[args->thread_index] = 1;
-    printf("%d: Thread completed\n", args->thread_index);
+    //printf("%d: Thread completed\n", args->thread_index);
     return NULL;
 }
 
@@ -199,11 +204,32 @@ int main(int argc, char *argv[])
   wakeup_all_seller_threads();
 
   // wait for all seller threads to exit
-  printf("Main waiting for threads to join!\n");
+  //printf("Main waiting for threads to join!\n");
   for (i = 0 ; i < 10; i++)
     pthread_join(tids[i], NULL); //TODO: Add & back
 
-  printf("All threads joined\n");
+  //printf("All threads joined\n");
+
+  int h_tickets = customer_count[0];
+  int h_turnedaway = turnedaway_count[0];
+  int m_tickets = 0;
+  int m_turnedaway = 0;
+  int l_tickets = 0;
+  int l_turnedaway = 0;
+
+  for(int i = 1; i < 4; i++) {
+    m_tickets += customer_count[i];
+    m_turnedaway += turnedaway_count[i];
+  }
+
+  for(int i = 4; i < 10; i++) {
+    l_tickets += customer_count[i];
+    l_turnedaway += turnedaway_count[i];
+  }
+
+  printf("H: %d customers purchased tickets with %d customers turned away\n", h_tickets, h_turnedaway);
+  printf("M: %d customers purchased tickets with %d customers turned away\n", m_tickets, m_turnedaway);
+  printf("L: %d customers purchased tickets with %d customers turned away\n", l_tickets, l_turnedaway);
 }
 
 /* ------ SEAT TABLE MANIPULATION FUNCTIONS -------- */
