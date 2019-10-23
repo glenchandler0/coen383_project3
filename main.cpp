@@ -49,29 +49,29 @@ void * sell(void * arguments)
     while(global_counter < RUNTIME)//this_seller->customers_left())
     {
         pthread_mutex_lock(&mutex);
-        printf("%d:%d Waiting for main\n", global_counter, args->thread_index);
         ready_list[args->thread_index] = 1;
 
         pthread_cond_wait(&cond, &mutex);
         pthread_mutex_unlock(&mutex);
 
-        printf("%d: Unlocked by main, doing work!\n", args->thread_index);
-
         // Moves people from waiting queue to ready queue
         // does one unit of work on whoever is in the front
+        
+        pthread_mutex_lock(&seats_mutex);
         Customer* cust = this_seller->update(global_counter);
         if(cust != NULL)
         {
             assign_next_seat(cust);
             printSeats();
         }
+        pthread_mutex_unlock(&seats_mutex);
+
             // printSeats();
             // printf("%d: Ticket sold\n", args->thread_index);
           
 
         if(global_counter >= RUNTIME || is_full())
         {
-            printf("%d: about to purge\n", args->thread_index);
             unsigned int num_purged = this_seller->purge_queues();
         }
     }
@@ -193,17 +193,17 @@ int main(int argc, char *argv[])
   {
     wait_for_sellers();
 
-    printf("\tAll threads ready, about to signal to begin\n");
+    // printf("All threads ready, about to signal to begin\n");
     wakeup_all_seller_threads(); //Race condition if seller waits for mutex
   }
   wakeup_all_seller_threads();
 
   // wait for all seller threads to exit
-  printf("\tMain waiting for threads to join!\n");
+  printf("Main waiting for threads to join!\n");
   for (i = 0 ; i < 10; i++)
     pthread_join(tids[i], NULL); //TODO: Add & back
 
-  printf("\tAll threads joined\n");
+  printf("All threads joined\n");
 }
 
 /* ------ SEAT TABLE MANIPULATION FUNCTIONS -------- */
@@ -284,6 +284,7 @@ Seat * assign_next_seat(Customer * cust)
 }
 void printSeats()
 {
+    printf("\n\n\n");
     for(int i = 0; i < ROWS; ++i)
     {
         for(int j = 0; j < COLS; ++j)
@@ -294,7 +295,7 @@ void printSeats()
             else
                 printf("  -  ");
         }
-        printf("\n\n");
+        printf("\n\n\n");
     }
 }
 //TODO: Delete, for testing only

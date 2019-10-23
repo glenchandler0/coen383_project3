@@ -59,6 +59,7 @@ Customer* Seller::update(unsigned int current_minute)
         // printf("Waiting Time: %d\n", cust->getWaitTime());
 
         // Output when customer arrived in 
+        printf("[00:%02d]\t", current_minute);
         printf("Customer ");
         cust->printCustomer();
         printf("arrived at time 00:%02d\n", cust->getArrivalTime());        
@@ -79,6 +80,7 @@ Customer* Seller::update(unsigned int current_minute)
             Customer* cust = this->ready->front();
             
             // Output when someone has been assigned a seat
+            printf("[00:%02d]\t", current_minute);
             printf("Customer ");
             cust->printCustomer();
             printf(" has finished purchasing a ticket.\n");
@@ -100,6 +102,8 @@ Customer* Seller::update(unsigned int current_minute)
             cust->setCustomerId(cust_id);
             this->sellTicket();
 
+
+            printf("[00:%02d]\t", current_minute);
             printf("Customer ");
             cust->printCustomer();
             printf(" has been assigned a seat.\n");
