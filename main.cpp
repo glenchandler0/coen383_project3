@@ -64,6 +64,7 @@ void * sell(void * arguments)
         Customer* cust = this_seller->update(global_counter);
         if(cust != NULL)
         {
+            customer_count[args->thread_index]++;
             assign_next_seat(cust);
             printSeats();
         }
@@ -79,7 +80,7 @@ void * sell(void * arguments)
         }
     }
 
-    customer_count[args->thread_index] += this_seller->getTicketsSold();
+    //customer_count[args->thread_index] += this_seller->getTicketsSold();
     turnedaway_count[args->thread_index] += this_seller->getNumPurged();
     // ready_list[args->thread_index] = 1;
     //printf("%d: Thread completed\n", args->thread_index);
