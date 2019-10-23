@@ -8,76 +8,17 @@
 #include "Customer.h"
 #include "Seat.h"
 
-#define ROWS 10 
+#define ROWS 10
 #define COLS 10
 #define RUNTIME 60
 
+//Function definitions
+void printSeats();
+bool is_full();
+void fill_seats(char priority, int num_seats);
+Seat * assign_next_seat(Customer * cust);
+
 Seat* seats[ROWS][COLS];
-
-
-int main(int argc, char *argv[]){
-
-    // Intialize 2D seating chart
-    for(int i = 0; i < ROWS; ++i)
-        for(int j = 0; j < COLS; ++j)
-            seats[i][j] = new Seat();
-        
-    Seller *sell1 = new Seller('M', 1);
-    // pq* sell1_queue = sell1->getQueue();
-    
-    Customer *cust2 = new Customer('H', 2, 9, 6);
-    Customer *cust1 = new Customer('M', 1, 1, 4);
-    
-
-    sell1->addToWaitingQueue(cust1);
-    sell1->addToWaitingQueue(cust2);
-
-
-    // printSeats();
-
-
-    sell1->update(3);
-    sell1->update(4);   
-    sell1->update(5);
-    sell1->update(6);
-    sell1->update(7);
-
-    q* dq = sell1->getReadyQueue();
-
-    while(dq->size() != 0)
-    {
-        Customer *c = dq->front();
-        dq->pop();
-        c->printCustomer();
-        printf("\n");
-    }
-
-    // sell1_queue->push(cust1);
-    // sell1_queue->push(cust2);
-    
-    // seats[1][1]->setCustomer(sell1_queue->top());
-    // seats[8][6]->setCustomer(sell1_queue->pop());
-
-
-
-
-}
-
-void printSeats()
-{
-    for(int i = 0; i < ROWS; ++i)
-    {
-        for(int j = 0; j < COLS; ++j)
-        {
-            Customer* cust = seats[i][j]->getCustomer();
-            if(cust != NULL)
-                cust->printCustomer();
-            else
-                printf("  -  ");
-        }
-        printf("\n\n");
-    }
-}
 
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -117,7 +58,7 @@ void * sell(void *arguments)
     //		if time is zero then give them seat and dequeue from ready queue EVENT 3
     // else
     //		Serve any buyer available in this seller queue that is ready (assign them random transaction time) EVENT 2
-    
+
     ++local_time;
 
   }
@@ -148,20 +89,11 @@ int main(int argc, char *argv[])
     std::cin >> N;
   }
 
-    // Intialize 2D seating chart
-    for(int i = 0; i < ROWS; ++i)
-        for(int j = 0; j < COLS; ++j)
-            seats[i][j] = new Seat();
- 
-    Customer *cust1 = new Customer('M', 1, 1, 4);
+  // Intialize 2D seating chart
+  for(int i = 0; i < ROWS; ++i)
+      for(int j = 0; j < COLS; ++j)
+          seats[i][j] = new Seat();
 
-
-    Customer *cust2 = new Customer('H', 2, 9, 51);
-
-    seats[1][1]->setCustomer(cust1);
-    seats[8][6]->setCustomer(cust2);
-
-    printSeats();
 
   int i;
   pthread_t tids[10];
@@ -209,3 +141,149 @@ int main(int argc, char *argv[])
   // Printout simulation results
   // exit(0);
 }
+
+/* ------ SEAT TABLE MANIPULATION FUNCTIONS -------- */
+bool is_full()
+{
+  for(int i = 0; i < ROWS; ++i)
+  {
+      for(int j = 0; j < COLS; ++j)
+      {
+          if(seats[i][j]->getAssigned() == false)
+            return false;
+      }
+  }
+
+  return true; //Never found an unassigned seat
+}
+
+Seat * assign_next_seat(Customer * cust)
+{
+  char priority = cust->getSellerType();
+  if(is_full() == true)
+    return NULL;
+
+  int i;
+  int j;
+  if(priority == 'H')
+  {
+  //nested for loop
+  for(int i = 0; i < ROWS; i++)
+  {
+    for(int j = 0; j < COLS; j++)
+    {
+      if(seats[i][j]->getAssigned()==false)
+      {
+        //Assign seat
+        seats[i][j]->setCustomer(cust);
+        return seats[i][j];
+      }
+    }
+  }
+  } //end priority if
+  else if(priority == 'M')
+  {
+  int row_array[] = {4,5,3,6,2,7,1,8,0,9};
+  //nested for loop
+  for(int i = 0; i < ROWS; i++)
+  {
+    for(int j = 0; j < COLS; j++)
+    {
+      if(seats[row_array[i]][j]->getAssigned()==false)
+      {
+        //Assign seat
+        seats[row_array[i]][j]->setCustomer(cust);
+        return seats[i][j];
+      }
+    }
+  }
+  } //end priority if
+  else if(priority == 'L')
+  {
+  //nested for loop
+  for(int i = ROWS-1; i >= 0; i--)
+  {
+    for(int j = COLS-1; j >= 0; j--)
+    {
+      if(seats[i][j]->getAssigned()==false)
+      {
+        //Assign seat
+        seats[i][j]->setCustomer(cust);
+        return seats[i][j];
+      }
+    }
+  }
+  } //end priority if
+
+
+  return NULL;
+}
+void printSeats()
+{
+    for(int i = 0; i < ROWS; ++i)
+    {
+        for(int j = 0; j < COLS; ++j)
+        {
+            Customer* cust = seats[i][j]->getCustomer();
+            if(cust != NULL)
+                cust->printCustomer();
+            else
+                printf("  -  ");
+        }
+        printf("\n\n");
+    }
+}
+//TODO: Delete, for testing only
+void fill_seats(char priority, int num_customers)
+{
+  for(int i = 0; i < num_customers; i++)
+  {
+    assign_next_seat(new Customer(priority, 1, 1, 4));
+  }
+}
+
+//-------------------- CODE DUMPSTER -------------------
+//Main for testing priority queues
+// int old_main(int argc, char *argv[]){
+//
+//     // Intialize 2D seating chart
+//     for(int i = 0; i < ROWS; ++i)
+//         for(int j = 0; j < COLS; ++j)
+//             seats[i][j] = new Seat();
+//
+//     Seller *sell1 = new Seller('M', 1);
+//     // pq* sell1_queue = sell1->getQueue();
+//
+//     Customer *cust2 = new Customer('H', 2, 9, 6);
+//     Customer *cust1 = new Customer('M', 1, 1, 4);
+//
+//
+//     sell1->addToWaitingQueue(cust1);
+//     sell1->addToWaitingQueue(cust2);
+//
+//
+//     // printSeats();
+//
+//
+//     sell1->update(3);
+//     sell1->update(4);
+//     sell1->update(5);
+//     sell1->update(6);
+//     sell1->update(7);
+// 
+//     q* dq = sell1->getReadyQueue();
+//
+//     while(dq->size() != 0)
+//     {
+//         Customer *c = dq->front();
+//         dq->pop();
+//         c->printCustomer();
+//         printf("\n");
+//     }
+//
+//     // sell1_queue->push(cust1);
+//     // sell1_queue->push(cust2);
+//
+//     // seats[1][1]->setCustomer(sell1_queue->top());
+//     // seats[8][6]->setCustomer(sell1_queue->pop());
+// }

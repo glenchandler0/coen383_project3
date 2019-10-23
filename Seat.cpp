@@ -17,6 +17,7 @@ bool Seat::setCustomer(Customer* cust)
     if(this->customer == NULL)
     {
         this->customer = cust;
+        this->assigned = true;
         return true;
     }else
         throw std::runtime_error("Tried to sell same seat twice!");
@@ -26,4 +27,3 @@ Customer* Seat::getCustomer()
 {
     return this->customer;
 }
-
