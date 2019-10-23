@@ -30,15 +30,20 @@ class Seller
         q *ready;
 
     public:
+
+        // Constructor
         Seller(char seller_type, unsigned int seller_id, unsigned int N);
-        void sellTicket();
+
+        // Getters
         char getSellerType();
         unsigned int getSellerId();
         unsigned int getTicketsSold();
+        bool customers_left();
 
+        // Setters/Helpers
         void addToWaitingQueue(Customer *new_customer);
-
         unsigned int purge_queues();
+        void sellTicket();
 
         // Call this every new minute
         void update(unsigned int current_minute);

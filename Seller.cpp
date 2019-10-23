@@ -15,9 +15,7 @@ Seller::Seller(char seller_type, unsigned int seller_id, unsigned int N)
     for(int i = 0; i < this->N; ++i)
     {
         Customer* new_customer = new Customer(this->seller_type, 
-                                              this->seller_id, 
-                                              this->tickets_sold, 
-                                              this->service_time);
+                                              this->seller_id);
         this->sellTicket();
         this->waiting->push(new_customer);
     }
@@ -89,11 +87,17 @@ void Seller::update(unsigned int current_minute)
         // If the person is new to the front line, then "assign" them a seat
         if(!this->waiting->top()->getHasBeenHelped())
         {
-            this->waiting->top()->setHasBeenHelped();
+            Customer* cust = this->waiting->top();
+            cust->setHasBeenHelped();
             
+            // Assign the customer an id based on order of the queue
+            unsigned int cust_id = this->getTicketsSold();
+            cust->setCustomerId(cust_id);
+            this->sellTicket();
+
             printf("Customer ");
             cust->printCustomer();
-            printf(" has been assigned a seat.")
+            printf(" has been assigned a seat.");
 
         }
 
@@ -129,4 +133,10 @@ unsigned int Seller::purge_queues()
     }
 
     return num_left;
+}
+
+// Removes all unserved Customers after concert is sold out
+bool Seller::customers_left()
+{
+    return (this->waiting->size() + this->ready->size()) > 0;
 }

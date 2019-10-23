@@ -19,10 +19,7 @@ class Customer
     public:
 
         // Constructor
-        Customer(char seller_type, 
-                 unsigned int seller_id,
-                 unsigned int customer_id,
-                 unsigned int wait_time);
+        Customer(char seller_type, unsigned int seller_id);
 
         // Getters
         char getSellerType(){return this->seller_type;}
@@ -35,6 +32,7 @@ class Customer
         // Setters
         void decrementWaitTime(){this->wait_time = this->wait_time - 1;}
         void setHasBeenHelped(){this->has_been_helped = true;}
+        void setCustomerId(unsigned int id){this->customer_id = id;}
 
         // Helper functions
         void printCustomer();
