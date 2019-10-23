@@ -20,6 +20,7 @@ Seat * assign_next_seat(Customer * cust);
 
 int global_counter;
 bool ready_list[10];
+bool completed_list[10];
 
 Seat* seats[ROWS][COLS];
 
@@ -32,6 +33,7 @@ pthread_mutex_t seats_mutex = PTHREAD_MUTEX_INITIALIZER;
 */
 //Struct for passing args to pthreads
 struct arg_struct {
+    int seller_id;
     char seller_type;
     int thread_index;
 };
@@ -71,18 +73,35 @@ int N;
 
 void * sell(void * arguments)
 {
-    while(global_counter < RUNTIME)
+    struct arg_struct *args = (struct arg_struct *)arguments;
+    Seller * this_seller = new Seller(args->seller_type, args->seller_id, N);
+
+    completed_list[args->thread_index] = 0;
+    int count = 0;
+    while(count < 65)//this_seller->customers_left())
     {
         pthread_mutex_lock(&mutex);
-        struct arg_struct *args = (struct arg_struct *)arguments;
         printf("%d:%d Waiting for main\n", global_counter, args->thread_index);
         ready_list[args->thread_index] = 1;
 
         pthread_cond_wait(&cond, &mutex);
         pthread_mutex_unlock(&mutex);
+
         printf("%d: Unlocked by main, doing work!\n", args->thread_index);
+
+        //Moves people from waiting queue to ready queue
+        //does one unit of work on whoever is in the front
+        this_seller->update(global_counter);
+          // printSeats();
+
+        if(global_counter >= RUNTIME || is_full())
+        {
+            unsigned int num_purged = this_seller->purge_queues();
+        }
+        count++;
     }
 
+    completed_list[args->thread_index] = 1;
     return NULL;
 }
 
@@ -105,10 +124,29 @@ void wait_for_sellers()
   //Reset all threads to not ready
   for(int i = 0; i < 10; i++)
   {
-    ready_list[i] = false;
+    if(completed_list[i] == true)
+      ready_list[i] = true;
+    else
+      ready_list[i] = false;
   }
 
   //Function won't complete until all entries are true
+}
+
+//TODO: Check mutex logic
+//Check completed_list[i]¿
+bool threads_running()
+{
+    bool complete = false;
+    // pthread_mutex_lock(&mutex);
+    for(int i = 0; i < 10; i++)
+    {
+      if(completed_list[i] == false)
+        complete = true;
+    }
+    // pthread_mutex_unlock(&mutex);
+
+    return complete;
 }
 
 void wakeup_all_seller_threads() {
@@ -175,14 +213,15 @@ int main(int argc, char *argv[])
 
   //Wake up all threads to begin their running
   // usleep(1000 * 1000);
-  for(global_counter = 0; global_counter < RUNTIME; global_counter++)
+  while(threads_running())
   {
     wait_for_sellers();
 
     printf("\tAll threads ready, about to signal to begin\n");
     wakeup_all_seller_threads(); //Race condition if seller waits for mutex
+    global_counter++;
   }
-  wakeup_all_seller_threads();
+  // wakeup_all_seller_threads();
 
   // wait for all seller threads to exit
   printf("\tMain waiting for threads to join!\n");
