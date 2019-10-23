@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
     wakeup_all_seller_threads(); //Race condition if seller waits for mutex
     global_counter++;
   }
-  // wakeup_all_seller_threads();
+  wakeup_all_seller_threads();
 
   // wait for all seller threads to exit
   printf("\tMain waiting for threads to join!\n");

@@ -50,7 +50,7 @@ void Seller::addToWaitingQueue(Customer *new_customer)
 bool Seller::update(unsigned int current_minute)
 {
     // Move people from the waiting queue to the ready queue
-    while(this->waiting->size() != 0 && 
+    while(!this->waiting->empty() && 
           current_minute > this->waiting->top()->getArrivalTime())
     {
         // Get first customer from waiting queue
@@ -69,23 +69,24 @@ bool Seller::update(unsigned int current_minute)
     }
 
     // Do one unit of work on a customer at the front of the ready queue
-    if(this->ready->size() != 0)
+    if(!this->ready->empty() && !this->waiting->empty())
     {
         // If someone has fully been served, remove them from the list and output a message
         if(this->waiting->top()->getWaitTime() == 0)
         {
             Customer* cust = this->waiting->top();
-            this->waiting->pop();
-
+            
             // Output when someone has been assigned a seat
             printf("Customer ");
             cust->printCustomer();
-            printf(" has finished purchasing a ticket.");
+            printf(" has finished purchasing a ticket.\n");
+            
+            this->waiting->pop();
 
             return true;
         }
 
-        // If the person is new to the front line, then "assign" them a seat
+        // If the person is new to the front line, then print seat assignment
         if(!this->waiting->top()->getHasBeenHelped())
         {
             Customer* cust = this->waiting->top();
@@ -98,7 +99,7 @@ bool Seller::update(unsigned int current_minute)
 
             printf("Customer ");
             cust->printCustomer();
-            printf(" has been assigned a seat.");
+            printf(" has been assigned a seat.\n");
 
         }
 
