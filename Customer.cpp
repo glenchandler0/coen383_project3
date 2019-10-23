@@ -1,6 +1,6 @@
 #include "Customer.h"
 
-Customer::Customer(char seller_type, unsigned int seller_id, unsigned int customer_id)
+Customer::Customer(char seller_type, unsigned int seller_id, unsigned int customer_id, unsigned int wait_time)
 {
     assert(seller_type == 'L' || seller_type == 'M' || seller_type =='H');
 
@@ -9,6 +9,13 @@ Customer::Customer(char seller_type, unsigned int seller_id, unsigned int custom
     this->customer_id = customer_id;
     this->arrival_time = rand() % 59; // Random number between 0-59
 
+    if(seller_type == 'L')
+        this->wait_time = rand() % 7 +4;
+    else if(seller_type == 'M')
+        this->wait_time = rand() % 4 + 2;
+    else if(seller_type == 'H')
+        this->wait_time = rand() % 2 + 1;
+    
 }
 
 void Customer::printCustomer()

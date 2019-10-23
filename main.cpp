@@ -37,9 +37,6 @@ struct arg_struct {
 int N;
 
 
-
-
-
 // seller thread to serve one time slice (1 minute)
 void * sell(void *arguments)
 {
@@ -241,13 +238,13 @@ void printSeats()
     }
 }
 //TODO: Delete, for testing only
-void fill_seats(char priority, int num_customers)
-{
-  for(int i = 0; i < num_customers; i++)
-  {
-    assign_next_seat(new Customer(priority, 1, 1));
-  }
-}
+// void fill_seats(char priority, int num_customers)
+// {
+//   for(int i = 0; i < num_customers; i++)
+//   {
+//     assign_next_seat(new Customer(priority, 1, 1));
+//   }
+// }
 
 //-------------------- CODE DUMPSTER -------------------
 //Main for testing priority queues

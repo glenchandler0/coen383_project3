@@ -2,16 +2,7 @@
 
 Seller::Seller(char seller_type, unsigned int seller_id, unsigned int N)
 {
-   
-    if(seller_type == 'L')
-        service_time = rand() % 7 +4;
-    else if(seller_type == 'M')
-        service_time = rand() % 4 + 2;
-    else if(seller_type == 'H')
-        service_time = rand() % 2 + 1;
-    else{
-        throw std::runtime_error("Incorrect seller type");
-    }
+    assert(seller_type == 'L' || seller_type == 'M' || seller_type =='H');
 
     this->N = N;
     this->seller_type = seller_type;
@@ -23,9 +14,11 @@ Seller::Seller(char seller_type, unsigned int seller_id, unsigned int N)
     // Add N customers to waiting queue
     for(int i = 0; i < this->N; ++i)
     {
-        Customer* new_customer = new Customer(this->seller_type, this->seller_id, this->tickets_sold);
+        Customer* new_customer = new Customer(this->seller_type, 
+                                              this->seller_id, 
+                                              this->tickets_sold, 
+                                              this->service_time);
         this->sellTicket();
-
         this->waiting->push(new_customer);
     }
 
@@ -57,7 +50,7 @@ void Seller::addToWaitingQueue(Customer *new_customer)
 
 void Seller::update(unsigned int current_minute)
 {
-
+    // Move people from the waiting queue to the ready queue
     while(this->waiting->size() != 0 && 
           current_minute > this->waiting->top()->getArrivalTime())
     {
@@ -75,4 +68,35 @@ void Seller::update(unsigned int current_minute)
         // Advance to next element in queue
         this->waiting->pop();
     }
+
+    // Do one unit of work on a customer at the front of the ready queue
+    if(this->ready->size() != 0)
+    {
+        // If someone has fully been served, remove them from the list and output a message
+        if(this->waiting->top()->getWaitTime() == 0)
+        {
+            Customer* cust = this->waiting->top();
+            this->waiting->pop();
+
+            // Output when someone has been assigned a seat
+            printf("Customer ");
+            cust->printCustomer();
+            printf(" was assigned a seat.");
+
+            return;
+        }
+
+        // If someone at the front of the queue, perform one unit of work on them
+        if(this->waiting->top()->getWaitTime() > 0)
+        {
+            Customer* cust = this->waiting->top();
+            cust->decrementWaitTime();
+            return;
+        }
+
+        //TODO: Should be done in main: Remove people if there are no more seats, and print 
+
+    }
+
+
 }
