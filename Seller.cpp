@@ -16,7 +16,8 @@ Seller::Seller(char seller_type, unsigned int seller_id)
     this->seller_type = seller_type;
     this->seller_id = seller_id;
     this->tickets_sold = 0;
-    // this->q = new std::priority_queue<Customer, std::vector<Customer>, Seller::CompareArrivalTime>;
+    this->waiting = new pq;
+    this->ready = new q;
 }
 
 void Seller::sellTicket()
@@ -36,4 +37,28 @@ unsigned int Seller::getSellerId()
 unsigned int Seller::getTicketsSold()
 {
     return this->tickets_sold;
+}
+
+void Seller::addToWaitingQueue(Customer *new_customer)
+{
+    this->waiting->push(new_customer);
+}
+
+void Seller::update(unsigned int current_minute)
+{
+
+    while(current_minute > this->waiting->top()->getArrivalTime() &&
+          this->waiting->size() != 0)
+    {
+        // Get first customer from waiting queue
+        Customer* cust = this->waiting->top();
+        
+        printf("Arrival Time: %d\n", cust->getArrivalTime());
+
+        // Add customer to ready queue
+        this->ready->push(cust);
+
+        // Advance to next element in queue
+        this->waiting->pop();
+    }
 }

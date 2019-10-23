@@ -31,11 +31,4 @@ class Customer
 
 };
 
-// struct CompareArrivalTime {
-//     bool operator()(Customer const &lhs, Customer const &rhs) {
-//         // return "true" if "p1" is ordered before "p2", for example:
-//         return lhs.getArrivalTime() < rhs.getArrivalTime();
-//     }
-// };
-
 #endif 

@@ -8,6 +8,15 @@
 
 #include "Customer.h"
 
+struct CompareArrivalTime {
+    bool operator()(Customer* &lhs, Customer* &rhs) {
+       return lhs->getArrivalTime() > rhs->getArrivalTime();
+    }
+};
+
+typedef std::priority_queue<Customer*, std::vector<Customer*>, CompareArrivalTime> pq;
+typedef std::queue<Customer*> q;
+
 class Seller
 {
     private:
@@ -15,7 +24,8 @@ class Seller
         char seller_type;
         unsigned int seller_id;
         unsigned int tickets_sold;
-        std::priority_queue<Customer> *q;
+        pq *waiting;
+        q *ready;
 
     public:
         Seller(char seller_type, unsigned int seller_id);
@@ -24,11 +34,17 @@ class Seller
         unsigned int getSellerId();
         unsigned int getTicketsSold();
 
-    // struct CompareArrivalTime {
-    //     bool operator()(Customer const & lhs, Customer const & rhs) {
-    //         return lhs.getArrivalTime() < rhs.getArrivalTime();
-    //     }
-    // };
-    
+        void addToWaitingQueue(Customer *new_customer);
+
+        // Call this every new minute
+        void update(unsigned int current_minute);
+
+        // For debugging
+        // pq* getWaitingQueue(){return this->waiting;}
+        // q* getReadyQueue(){return this->ready;}
+
+
 };
+
+
 #endif
