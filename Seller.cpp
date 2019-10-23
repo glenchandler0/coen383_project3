@@ -15,7 +15,7 @@ Seller::Seller(char seller_type, unsigned int seller_id, unsigned int N)
     // Add N customers to waiting queue
     for(int i = 0; i < this->N; ++i)
     {
-        Customer* new_customer = new Customer(this->seller_type, 
+        Customer* new_customer = new Customer(this->seller_type,
                                               this->seller_id);
         this->waiting->push(new_customer);
     }
@@ -49,20 +49,20 @@ void Seller::addToWaitingQueue(Customer *new_customer)
 Customer* Seller::update(unsigned int current_minute)
 {
     // Move people from the waiting queue to the ready queue
-    while(!this->waiting->empty() && 
+    while(!this->waiting->empty() &&
           current_minute > this->waiting->top()->getArrivalTime())
     {
         // Get first customer from waiting queue
         Customer* cust = this->waiting->top();
-        
+
         // DEBUG
         // printf("Waiting Time: %d\n", cust->getWaitTime());
 
-        // Output when customer arrived in 
+        // Output when customer arrived in
         printf("[00:%02d]\t", current_minute);
         printf("Customer ");
         cust->printCustomer();
-        printf("arrived at time 00:%02d\n", cust->getArrivalTime());        
+        printf("arrived at time 00:%02d\n", cust->getArrivalTime());
 
         // Add customer to ready queue
         this->ready->push(cust);
@@ -78,13 +78,13 @@ Customer* Seller::update(unsigned int current_minute)
         if(this->ready->front()->getWaitTime() == 0)
         {
             Customer* cust = this->ready->front();
-            
+
             // Output when someone has been assigned a seat
             printf("[00:%02d]\t", current_minute);
             printf("Customer ");
             cust->printCustomer();
             printf(" has finished purchasing a ticket.\n");
-            
+
             this->ready->pop();
 
             return cust;
@@ -95,7 +95,7 @@ Customer* Seller::update(unsigned int current_minute)
         {
             Customer* cust = this->ready->front();
             cust->setHasBeenHelped();
-            
+
             // Assign the customer an id based on order of the queue
             unsigned int cust_id = this->getTicketsSold();
             // printf("GET TICKETS SOLD: %d\n", cust_id);
@@ -118,7 +118,7 @@ Customer* Seller::update(unsigned int current_minute)
             return NULL;
         }
 
-        //TODO: Should be done in main: Remove people if there are no more seats, and print 
+        //TODO: Should be done in main: Remove people if there are no more seats, and print
 
     }
     return NULL;
@@ -141,7 +141,7 @@ unsigned int Seller::purge_queues()
         ++num_left;
     }
 
-    this->num_purged = num_left;
+    this->num_purged += num_left;
 
     return num_left;
 }
