@@ -46,7 +46,7 @@ void Seller::addToWaitingQueue(Customer *new_customer)
     this->waiting->push(new_customer);
 }
 
-void Seller::update(unsigned int current_minute)
+bool Seller::update(unsigned int current_minute)
 {
     // Move people from the waiting queue to the ready queue
     while(this->waiting->size() != 0 && 
@@ -81,7 +81,7 @@ void Seller::update(unsigned int current_minute)
             cust->printCustomer();
             printf(" has finished purchasing a ticket.");
 
-            return;
+            return true;
         }
 
         // If the person is new to the front line, then "assign" them a seat
@@ -106,13 +106,13 @@ void Seller::update(unsigned int current_minute)
         {
             Customer* cust = this->waiting->top();
             cust->decrementWaitTime();
-            return;
+            return false;
         }
 
         //TODO: Should be done in main: Remove people if there are no more seats, and print 
 
     }
-
+    return false;
 }
 
 // Removes all unserved Customers after concert is sold out

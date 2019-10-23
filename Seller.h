@@ -46,7 +46,7 @@ class Seller
         void sellTicket();
 
         // Call this every new minute
-        void update(unsigned int current_minute);
+        bool update(unsigned int current_minute);
 
         // For debugging
         pq* getWaitingQueue(){return this->waiting;}
