@@ -96,7 +96,7 @@ Customer* Seller::update(unsigned int current_minute)
             
             // Assign the customer an id based on order of the queue
             unsigned int cust_id = this->getTicketsSold();
-            printf("GET TICKETS SOLD: %d\n", cust_id);
+            // printf("GET TICKETS SOLD: %d\n", cust_id);
             cust->setCustomerId(cust_id);
             this->sellTicket();
 
@@ -125,15 +125,15 @@ unsigned int Seller::purge_queues()
 {
     unsigned int num_left = 0;
 
-    while(this->waiting->size() != 0)
+    while(!this->waiting->empty())
     {
         this->waiting->pop();
         ++num_left;
     }
 
-    while(this->ready->size() != 0)
+    while(!this->ready->empty())
     {
-        this->waiting->pop();
+        this->ready->pop();
         ++num_left;
     }
 
