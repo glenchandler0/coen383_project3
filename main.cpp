@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <iostream>
 
 #include "Seller.h"
 #include "Customer.h"
@@ -7,29 +10,9 @@
 
 #define ROWS 10 
 #define COLS 10
-
-void printSeats();
+#define RUNTIME 10
 
 Seat* seats[ROWS][COLS];
-
-int main(int argc, char *argv[]){
-
-    // Intialize 2D seating chart
-    for(int i = 0; i < ROWS; ++i)
-        for(int j = 0; j < COLS; ++j)
-            seats[i][j] = new Seat();
-        
-    Customer *cust1 = new Customer('M', 1, 1, 4);
-
-
-    Customer *cust2 = new Customer('H', 2, 9, 51);
-
-    seats[1][1]->setCustomer(cust1);
-    seats[8][6]->setCustomer(cust2);
-
-    printSeats();
-
-}
 
 void printSeats()
 {
@@ -46,79 +29,128 @@ void printSeats()
         printf("\n\n");
     }
 }
-        
+
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
+/*
+* Variables and data that is needed
+*/
+//Struct for passing args to pthreads
+struct arg_struct {
+    char seller_type;
+    int thread_index;
+};
 
-//pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-//pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-// // seller thread to serve one time slice (1 minute)
-// void *  sell(char *seller_type){
-//     While (having more work todo){
-//         pthread_mutex_lock(&mutex);
-//         pthread_cond_wait(&cond, &mutex);
-//         pthread_mutex_unlock(&mutex);
-//         // Serve any buyer available in this seller queue that is ready 
-//         // now to buy ticket till done with all relevant buyers in their queue
-//         // ..................
-//         }
-//         return NULL;       // thread exits
-//         }
-        
-// void wakeup_all_seller_threads(){
-//     pthread_mutex_lock(&mutex);
-//     pthread_cond_broadcast(&cond);
-//     pthread_mutex_unlock(&mutex);
-// }
-
-    // for(int i = 0; i < ROWS; ++i)
-    //     for(int j = 0; i < COLS; ++j)
-    //         seats[i][j] = new Seat();
+// int value N that the user will pass in through the command line
+int N;
 
 
-    
-    // print_seats();
-    
-    // Seller x = Seller('L', 2);
+//TODO: Create list of queues that can be referenced for a specific seller
 
-    // printf("Seller: %c%d\n", x.getSellerType(), x.getSellerId());
+// seller thread to serve one time slice (1 minute)
+void * sell(void *arguments)
+{
+  //Fetch arguments from void * struct
+  struct arg_struct *args = (struct arg_struct *)arguments;
+  int i = 0;
+  printf("0:%02d %c%d initiated\n", i, args->seller_type, args->thread_index);
+  while(i < RUNTIME)
+  {
+    printf("0:%02d %c%d: waiting for main to release\n", i, args->seller_type, args->thread_index);
+    pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
+    // Serve any buyer available in this seller queue that is ready
+    // now to buy ticket till done with all relevant buyers in their queue ..................
+    ++i;
 
-    
+  }
+  printf("0:%02d %c%d time slice work completed\n", i, args->seller_type, args->thread_index);
 
-    // std::cout << seats;
+  return NULL; // thread exits
+}
 
-    // int i;
-    // pthread_t tids[10];
-    // char* Seller_type;
-    // Create necessary data structures for the simulator. 
+void wakeup_all_seller_threads() {
+  pthread_mutex_lock(&mutex);
+  pthread_cond_broadcast(&cond);
+  pthread_mutex_unlock(&mutex);
+}
 
-    // for(int i=0; i < ROWS; ++i)
-    //     for(int j = 0; i < COLS; ++j)
-    //         for 
+//TODO: Command line argument for N
+int main(int argc, char *argv[])
+{
+  if(argc != 2) {
+    printf("Error: Input the program name followed by an integer N\n");
+    return -1;
+  }
+
+  N = atoi(argv[1]);
+
+  while(N <= 0 || N > 100) {
+    printf("Error: Please enter a value between 1 and 100\n");
+    std::cin >> N;
+  }
+
+    // Intialize 2D seating chart
+    for(int i = 0; i < ROWS; ++i)
+        for(int j = 0; j < COLS; ++j)
+            seats[i][j] = new Seat();
+ 
+    Customer *cust1 = new Customer('M', 1, 1, 4);
 
 
-    // // Create buyers list for each seller ticket queue based on the 
-    // // N value within an hour and have them in the seller queue.
-    // // Create 10 threads representing the 10 sellers.
-    // Seller_type = "H";
-    // pthread_create(&tids[0], NULL, sell, &seller-type);
-    
-    // Seller_type type = "M";
-    // for (i = 1; i < 4; i++) 
-    //     pthread_create(&tids[i], NULL, sell, &seller-type);
-    
-    // seller-type = “L”;
-    // for (i = 4; i < 10; i++)
-    //     pthread_create(&tids[i], NULL, sell, &seller-type);
-    
-    // // wakeup all seller threads
-    // wakeup_all_seller_threads();
-    
-    // // wait for all seller threads to exit
-    // for (i = 0 ; i < 10 ; i++)
-    //     pthread_join(&tids[i], NULL);
-    
-    // // Printout simulation results............
-    // exit(0);
+    Customer *cust2 = new Customer('H', 2, 9, 51);
 
+    seats[1][1]->setCustomer(cust1);
+    seats[8][6]->setCustomer(cust2);
+
+    printSeats();
+
+  int i;
+  pthread_t tids[10];
+  char seller_type;
+
+  // Create necessary data structures for the simulator.
+  // Create buyers list for each seller ticket queue based on the // N value within an hour and have them in the seller queue.
+  // Create 10 threads representing the 10 sellers.
+  struct arg_struct *args;
+
+  args = new arg_struct;
+  args->seller_type = 'H';
+  args->thread_index = 0;
+  pthread_create(&(tids[0]), NULL, &sell, args); //ERROR
+
+  for (i = 1; i < 4; i++)
+  {
+    args = new arg_struct;
+    args->seller_type = 'M';
+    args->thread_index = i;
+    pthread_create(&tids[i], NULL, &sell, args);
+  }
+
+  for (i = 4; i < 10; i++)
+  {
+    args = new arg_struct;
+    args->seller_type = 'L';
+    args->thread_index = i;
+    pthread_create(&tids[i], NULL, &sell, args); // wakeup all seller threads
+  }
+
+  //Wake up all threads to begin their running
+  printf("\tAll threads created, about to signal to begin\n");
+  // usleep(1000 * 1000);
+  for(int current = 0; current < RUNTIME; current++) {
+  usleep(500);
+  wakeup_all_seller_threads(); //Race condition if seller waits for mutex
+  }
+  // wait for all seller threads to exit
+  for (i = 0 ; i < 10 ; i++)
+    pthread_join(tids[i], NULL); //TODO: Add & back
+
+  printf("\tAll threads joined\n");
+
+  // Printout simulation results
+  // exit(0);
+}
