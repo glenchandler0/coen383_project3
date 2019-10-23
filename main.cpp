@@ -10,7 +10,7 @@
 
 #define ROWS 10
 #define COLS 10
-#define RUNTIME 60
+#define RUNTIME 1000
 
 //Function definitions
 void printSeats();
@@ -20,7 +20,6 @@ Seat * assign_next_seat(Customer * cust);
 
 int global_counter;
 bool ready_list[10];
-bool completed_list[10];
 
 Seat* seats[ROWS][COLS];
 
@@ -41,44 +40,13 @@ struct arg_struct {
 // int value N that the user will pass in through the command line
 int N;
 
-
-// seller thread to serve one time slice (1 minute)
-// void * sell(void *arguments)
-// {
-//   //Fetch arguments from void * struct
-//   struct arg_struct *args = (struct arg_struct *)arguments;
-//   int local_time = 0;
-//   printf("0:%02d %c%d initiated\n", local_time, args->seller_type, args->thread_index);
-//   while(local_time < RUNTIME) // while local time is less than RUNTIME and both queues aren't empty
-//   {
-//     printf("0:%02d %c%d: waiting for main to release\n", local_time, args->seller_type, args->thread_index);
-//     pthread_mutex_lock(&mutex);
-//     pthread_cond_wait(&cond, &mutex);
-//     pthread_mutex_unlock(&mutex);
-//     // dequeue all valid customers from the waiting queue and queue them into the ready queue EVENT 1
-//     // if front customer is being helped
-//     //		decrement their timer
-//     //		if time is zero then give them seat and dequeue from ready queue EVENT 3
-//     // else
-//     //		Serve any buyer available in this seller queue that is ready (assign them random transaction time) EVENT 2
-//
-//     ++local_time;
-//
-//   }
-//   // if ready queue is not empty then remove all customers from queue until empty
-//   printf("0:%02d %c%d time slice work completed\n", local_time, args->seller_type, args->thread_index);
-//
-//   return NULL; // thread exits
-// }
-
 void * sell(void * arguments)
 {
     struct arg_struct *args = (struct arg_struct *)arguments;
     Seller * this_seller = new Seller(args->seller_type, args->seller_id, N);
 
-    completed_list[args->thread_index] = 0;
     int count = 0;
-    while(count < 65)//this_seller->customers_left())
+    while(global_counter < RUNTIME)//this_seller->customers_left())
     {
         pthread_mutex_lock(&mutex);
         printf("%d:%d Waiting for main\n", global_counter, args->thread_index);
@@ -91,18 +59,19 @@ void * sell(void * arguments)
 
         //Moves people from waiting queue to ready queue
         //does one unit of work on whoever is in the front
-        if(this_seller->update(global_counter))
-          printf("%d: Ticket sold\n", args->thread_index);
+        // if(this_seller->update(global_counter))
+        //   printf("%d: Ticket sold\n", args->thread_index);
           // printSeats();
 
         if(global_counter >= RUNTIME || is_full())
         {
+            printf("%d: about to purge\n", args->thread_index);
             unsigned int num_purged = this_seller->purge_queues();
         }
-        count++;
     }
 
-    completed_list[args->thread_index] = 1;
+    // ready_list[args->thread_index] = 1;
+    printf("%d: Thread completed\n", args->thread_index);
     return NULL;
 }
 
@@ -125,9 +94,6 @@ void wait_for_sellers()
   //Reset all threads to not ready
   for(int i = 0; i < 10; i++)
   {
-    if(completed_list[i] == true)
-      ready_list[i] = true;
-    else
       ready_list[i] = false;
   }
 
@@ -136,19 +102,19 @@ void wait_for_sellers()
 
 //TODO: Check mutex logic
 //Check completed_list[i]¿
-bool threads_running()
-{
-    bool complete = false;
-    // pthread_mutex_lock(&mutex);
-    for(int i = 0; i < 10; i++)
-    {
-      if(completed_list[i] == false)
-        complete = true;
-    }
-    // pthread_mutex_unlock(&mutex);
-
-    return complete;
-}
+// bool threads_running()
+// {
+//     bool complete = false;
+//     // pthread_mutex_lock(&mutex);
+//     for(int i = 0; i < 10; i++)
+//     {
+//       if(completed_list[i] == false)
+//         complete = true;
+//     }
+//     // pthread_mutex_unlock(&mutex);
+//
+//     return complete;
+// }
 
 void wakeup_all_seller_threads() {
   pthread_mutex_lock(&mutex);
@@ -188,6 +154,7 @@ int main(int argc, char *argv[])
   struct arg_struct *args;
 
   args = new arg_struct;
+  args->seller_id = 0;
   args->seller_type = 'H';
   args->thread_index = 0;
 
@@ -198,6 +165,7 @@ int main(int argc, char *argv[])
   for (i = 1; i < 4; i++)
   {
     args = new arg_struct;
+    args->seller_id = i-1;
     args->seller_type = 'M';
     args->thread_index = i;
     pthread_create(&tids[i], NULL, &sell, args);
@@ -207,6 +175,7 @@ int main(int argc, char *argv[])
   for (i = 4; i < 10; i++)
   {
     args = new arg_struct;
+    args->seller_id = i-4;
     args->seller_type = 'L';
     args->thread_index = i;
     pthread_create(&tids[i], NULL, &sell, args); // wakeup all seller threads
@@ -214,13 +183,12 @@ int main(int argc, char *argv[])
 
   //Wake up all threads to begin their running
   // usleep(1000 * 1000);
-  while(threads_running())
+  for(global_counter = 0; global_counter < RUNTIME; global_counter++)
   {
     wait_for_sellers();
 
     printf("\tAll threads ready, about to signal to begin\n");
     wakeup_all_seller_threads(); //Race condition if seller waits for mutex
-    global_counter++;
   }
   wakeup_all_seller_threads();
 
