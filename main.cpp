@@ -23,34 +23,33 @@ int main(int argc, char *argv[]){
     Seller *sell1 = new Seller('M', 1);
     // pq* sell1_queue = sell1->getQueue();
     
-    Customer *cust1 = new Customer('M', 1, 1, 4);
     Customer *cust2 = new Customer('H', 2, 9, 6);
+    Customer *cust1 = new Customer('M', 1, 1, 4);
+    
 
     sell1->addToWaitingQueue(cust1);
     sell1->addToWaitingQueue(cust2);
 
 
-    printSeats();
+    // printSeats();
 
-    printf("====================================================\n");
+
     sell1->update(3);
-    printSeats();
-    
-    printf("====================================================\n");
-    sell1->update(4);
-    printSeats();
-
-    printf("====================================================\n");
+    sell1->update(4);   
     sell1->update(5);
-    printSeats();
-
-    printf("====================================================\n");
     sell1->update(6);
-    printSeats();
-
-    printf("====================================================\n");
     sell1->update(7);
-    printSeats();
+
+    q* dq = sell1->getReadyQueue();
+
+    while(dq->size() != 0)
+    {
+        Customer *c = dq->front();
+        dq->pop();
+        c->printCustomer();
+        printf("\n");
+    }
+
     // sell1_queue->push(cust1);
     // sell1_queue->push(cust2);
     

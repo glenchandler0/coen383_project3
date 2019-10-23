@@ -41,7 +41,7 @@ class Seller
 
         // For debugging
         // pq* getWaitingQueue(){return this->waiting;}
-        // q* getReadyQueue(){return this->ready;}
+        q* getReadyQueue(){return this->ready;}
 
 
 };

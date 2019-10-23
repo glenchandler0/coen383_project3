@@ -47,13 +47,16 @@ void Seller::addToWaitingQueue(Customer *new_customer)
 void Seller::update(unsigned int current_minute)
 {
 
-    while(current_minute > this->waiting->top()->getArrivalTime() &&
-          this->waiting->size() != 0)
+    while(this->waiting->size() != 0 && 
+          current_minute > this->waiting->top()->getArrivalTime())
     {
         // Get first customer from waiting queue
         Customer* cust = this->waiting->top();
         
-        printf("Arrival Time: %d\n", cust->getArrivalTime());
+        // Output when customer arrived in 
+        printf("Customer ");
+        cust->printCustomer();
+        printf("arrived at time 00:%02d\n", cust->getArrivalTime());        
 
         // Add customer to ready queue
         this->ready->push(cust);
