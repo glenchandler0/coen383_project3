@@ -56,6 +56,9 @@ bool Seller::update(unsigned int current_minute)
         // Get first customer from waiting queue
         Customer* cust = this->waiting->top();
         
+        // DEBUG
+        printf("Waiting Time: %d\n", cust->getWaitTime());
+
         // Output when customer arrived in 
         printf("Customer ");
         cust->printCustomer();
@@ -69,19 +72,19 @@ bool Seller::update(unsigned int current_minute)
     }
 
     // Do one unit of work on a customer at the front of the ready queue
-    if(!this->ready->empty() && !this->waiting->empty())
+    if(!this->ready->empty())
     {
         // If someone has fully been served, remove them from the list and output a message
-        if(this->waiting->top()->getWaitTime() == 0)
+        if(this->ready->front()->getWaitTime() == 0)
         {
-            Customer* cust = this->waiting->top();
+            Customer* cust = this->ready->front();
             
             // Output when someone has been assigned a seat
             printf("Customer ");
             cust->printCustomer();
             printf(" has finished purchasing a ticket.\n");
             
-            this->waiting->pop();
+            this->ready->front();
 
             return true;
         }
