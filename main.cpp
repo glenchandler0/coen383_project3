@@ -37,7 +37,8 @@ struct arg_struct {
 int N;
 
 
-//TODO: Create list of queues that can be referenced for a specific seller
+
+
 
 // seller thread to serve one time slice (1 minute)
 void * sell(void *arguments)
@@ -100,15 +101,19 @@ int main(int argc, char *argv[])
   char seller_type;
 
   // Create necessary data structures for the simulator.
-  // Create buyers list for each seller ticket queue based on the // N value within an hour and have them in the seller queue.
+  // Create buyers list for each seller ticket queue based on the
+  // N value within an hour and have them in the seller queue.
   // Create 10 threads representing the 10 sellers.
   struct arg_struct *args;
 
   args = new arg_struct;
   args->seller_type = 'H';
   args->thread_index = 0;
-  pthread_create(&(tids[0]), NULL, &sell, args); //ERROR
 
+  // Create thread for high priority seller
+  pthread_create(&(tids[0]), NULL, &sell, args);
+
+  // Create threads for medium priority seller
   for (i = 1; i < 4; i++)
   {
     args = new arg_struct;
@@ -117,6 +122,7 @@ int main(int argc, char *argv[])
     pthread_create(&tids[i], NULL, &sell, args);
   }
 
+  // Create threads for low priority seller
   for (i = 4; i < 10; i++)
   {
     args = new arg_struct;
@@ -129,9 +135,10 @@ int main(int argc, char *argv[])
   printf("\tAll threads created, about to signal to begin\n");
   // usleep(1000 * 1000);
   for(int current = 0; current < RUNTIME; current++) {
-  usleep(10000);
-  wakeup_all_seller_threads(); //Race condition if seller waits for mutex
+    usleep(10000);
+    wakeup_all_seller_threads(); //Race condition if seller waits for mutex
   }
+
   // wait for all seller threads to exit
   for (i = 0 ; i < 10; i++)
     pthread_join(tids[i], NULL); //TODO: Add & back
@@ -238,7 +245,7 @@ void fill_seats(char priority, int num_customers)
 {
   for(int i = 0; i < num_customers; i++)
   {
-    assign_next_seat(new Customer(priority, 1, 1, 4));
+    assign_next_seat(new Customer(priority, 1, 1));
   }
 }
 
@@ -286,4 +293,38 @@ void fill_seats(char priority, int num_customers)
 //
 //     // seats[1][1]->setCustomer(sell1_queue->top());
 //     // seats[8][6]->setCustomer(sell1_queue->pop());
+// }
+
+
+
+
+//TODO: Create list of queues that can be referenced for a specific seller
+
+// // seller thread to serve one time slice (1 minute)
+// void * sell(void *arguments)
+// {
+//   //Fetch arguments from void * struct
+//   struct arg_struct *args = (struct arg_struct *)arguments;
+//   int local_time = 0;
+//   printf("0:%02d %c%d initiated\n", local_time, args->seller_type, args->thread_index);
+//   while(local_time < RUNTIME) // while local time is less than RUNTIME and both queues aren't empty
+//   {
+//     printf("0:%02d %c%d: waiting for main to release\n", local_time, args->seller_type, args->thread_index);
+//     pthread_mutex_lock(&mutex);
+//     pthread_cond_wait(&cond, &mutex);
+//     pthread_mutex_unlock(&mutex);
+//     // dequeue all valid customers from the waiting queue and queue them into the ready queue EVENT 1
+//     // if front customer is being helped
+//     //		decrement their timer
+//     //		if time is zero then give them seat and dequeue from ready queue EVENT 3
+//     // else
+//     //		Serve any buyer available in this seller queue that is ready (assign them random transaction time) EVENT 2
+
+//     ++local_time;
+
+//   }
+//   // if ready queue is not empty then remove all customers from queue until empty
+//   printf("0:%02d %c%d time slice work completed\n", local_time, args->seller_type, args->thread_index);
+
+//   return NULL; // thread exits
 // }

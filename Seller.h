@@ -24,11 +24,13 @@ class Seller
         char seller_type;
         unsigned int seller_id;
         unsigned int tickets_sold;
+        unsigned int N;
+
         pq *waiting;
         q *ready;
 
     public:
-        Seller(char seller_type, unsigned int seller_id);
+        Seller(char seller_type, unsigned int seller_id, unsigned int N);
         void sellTicket();
         char getSellerType();
         unsigned int getSellerId();
@@ -40,7 +42,7 @@ class Seller
         void update(unsigned int current_minute);
 
         // For debugging
-        // pq* getWaitingQueue(){return this->waiting;}
+        pq* getWaitingQueue(){return this->waiting;}
         q* getReadyQueue(){return this->ready;}
 
 

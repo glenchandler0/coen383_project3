@@ -3,6 +3,8 @@
 
 #include <assert.h>
 #include <iostream> 
+#include <stdlib.h>
+
 
 class Customer
 {
@@ -17,8 +19,7 @@ class Customer
         // Constructor
         Customer(char seller_type, 
                  unsigned int seller_id,
-                 unsigned int customer_id,
-                 unsigned int arrival_time);
+                 unsigned int customer_id);
 
         // Getters
         char getSellerType(){return this->seller_type;}

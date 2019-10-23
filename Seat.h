@@ -1,7 +1,6 @@
 #ifndef __SEAT_H__
 #define __SEAT_H__
 
-#include "Seat.h"
 #include "Customer.h"
 
 class Seat

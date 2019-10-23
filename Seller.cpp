@@ -1,6 +1,6 @@
 #include "Seller.h"
 
-Seller::Seller(char seller_type, unsigned int seller_id)
+Seller::Seller(char seller_type, unsigned int seller_id, unsigned int N)
 {
    
     if(seller_type == 'L')
@@ -13,11 +13,22 @@ Seller::Seller(char seller_type, unsigned int seller_id)
         throw std::runtime_error("Incorrect seller type");
     }
 
+    this->N = N;
     this->seller_type = seller_type;
     this->seller_id = seller_id;
     this->tickets_sold = 0;
     this->waiting = new pq;
     this->ready = new q;
+
+    // Add N customers to waiting queue
+    for(int i = 0; i < this->N; ++i)
+    {
+        Customer* new_customer = new Customer(this->seller_type, this->seller_id, this->tickets_sold);
+        this->sellTicket();
+
+        this->waiting->push(new_customer);
+    }
+
 }
 
 void Seller::sellTicket()
