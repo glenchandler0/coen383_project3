@@ -25,6 +25,7 @@ class Seller
         unsigned int seller_id;
         unsigned int tickets_sold;
         unsigned int N;
+        unsigned int num_purged;
 
         pq *waiting;
         q *ready;
@@ -39,11 +40,13 @@ class Seller
         unsigned int getSellerId();
         unsigned int getTicketsSold();
         bool customers_left();
+        unsigned int getNumPurged(){return this->num_purged;}
 
         // Setters/Helpers
         void addToWaitingQueue(Customer *new_customer);
         unsigned int purge_queues();
         void sellTicket();
+        
 
         // Call this every new minute
         bool update(unsigned int current_minute);

@@ -8,6 +8,7 @@ Seller::Seller(char seller_type, unsigned int seller_id, unsigned int N)
     this->seller_type = seller_type;
     this->seller_id = seller_id;
     this->tickets_sold = 0;
+    this->num_purged = 0;
     this->waiting = new pq;
     this->ready = new q;
 
@@ -131,6 +132,8 @@ unsigned int Seller::purge_queues()
         this->waiting->pop();
         ++num_left;
     }
+
+    this->num_purged = num_left;
 
     return num_left;
 }
