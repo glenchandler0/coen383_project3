@@ -8,6 +8,7 @@ Customer::Customer(char seller_type, unsigned int seller_id, unsigned int custom
     this->seller_id = seller_id;
     this->customer_id = customer_id;
     this->arrival_time = rand() % 59; // Random number between 0-59
+    this->has_been_helped = false;
 
     if(seller_type == 'L')
         this->wait_time = rand() % 7 +4;

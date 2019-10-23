@@ -38,6 +38,8 @@ class Seller
 
         void addToWaitingQueue(Customer *new_customer);
 
+        unsigned int purge_queues();
+
         // Call this every new minute
         void update(unsigned int current_minute);
 

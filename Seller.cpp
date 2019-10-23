@@ -81,9 +81,20 @@ void Seller::update(unsigned int current_minute)
             // Output when someone has been assigned a seat
             printf("Customer ");
             cust->printCustomer();
-            printf(" was assigned a seat.");
+            printf(" has finished purchasing a ticket.");
 
             return;
+        }
+
+        // If the person is new to the front line, then "assign" them a seat
+        if(!this->waiting->top()->getHasBeenHelped())
+        {
+            this->waiting->top()->setHasBeenHelped();
+            
+            printf("Customer ");
+            cust->printCustomer();
+            printf(" has been assigned a seat.")
+
         }
 
         // If someone at the front of the queue, perform one unit of work on them
@@ -98,5 +109,24 @@ void Seller::update(unsigned int current_minute)
 
     }
 
+}
 
+// Removes all unserved Customers after concert is sold out
+unsigned int Seller::purge_queues()
+{
+    unsigned int num_left = 0;
+
+    while(this->waiting->size() != 0)
+    {
+        this->waiting->pop();
+        ++num_left;
+    }
+
+    while(this->ready->size() != 0)
+    {
+        this->waiting->pop();
+        ++num_left;
+    }
+
+    return num_left;
 }
